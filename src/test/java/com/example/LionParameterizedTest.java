@@ -13,7 +13,6 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-
 public class LionParameterizedTest {
     private final String sex;
     private final boolean expectedHasMane;

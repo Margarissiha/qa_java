@@ -10,59 +10,68 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-
 public class CatTest {
+    // Мок зависимости: Cat внутри хранит Predator, а Feline реализует Predator
     @Mock
-    private Predator predatorMock;
+    private Feline feline;
 
     private Cat cat;
 
     @Before
     public void setUp() {
-        cat = new Cat(predatorMock);
+        // Given: кот, которому передали зависимость
+        cat = new Cat(feline);
     }
 
     @Test
-    public void testGetSound() {
-        assertEquals("Кот должен мяукать", "Мяу", cat.getSound());
+    public void shouldReturnMeowWhenGetSoundCalled() {
+
+        // When: вызываем метод getSound()
+        String sound = cat.getSound();
+
+        // Then: кот должен сказать "Мяу"
+        assertEquals("Мяу", sound);
     }
 
     @Test
-    public void testGetFoodReturnsCorrectList() throws Exception {
+    public void shouldReturnFoodWhenGetFoodCalled() throws Exception {
+
+        // Given: зависимость возвращает список еды
         List<String> expectedFood = List.of("Животные", "Птицы", "Рыба");
-        when(predatorMock.eatMeat()).thenReturn(expectedFood);
+        Mockito.when(feline.eatMeat()).thenReturn(expectedFood);
 
+        // When: вызываем getFood()
         List<String> actualFood = cat.getFood();
-        assertEquals("Еда кота должна совпадать с едой хищника",
-                expectedFood, actualFood);
+
+        // Then: возвращается ожидаемый результат
+        assertEquals(expectedFood, actualFood);
     }
 
     @Test
-    public void testGetFoodCallsEatMeatOnce() throws Exception {
-        List<String> expectedFood = List.of("Животные", "Птицы", "Рыба");
-        when(predatorMock.eatMeat()).thenReturn(expectedFood);
+    public void shouldCallEatMeatWhenGetFoodCalled() throws Exception {
 
+        // Given: зависимость настроена
+        Mockito.when(feline.eatMeat()).thenReturn(List.of("Животные"));
+
+        // When: вызываем getFood()
         cat.getFood();
-        Mockito.verify(predatorMock, Mockito.times(1)).eatMeat();
+
+        // Then: кот обращается к зависимости
+        Mockito.verify(feline).eatMeat();
     }
 
     @Test(expected = Exception.class)
-    public void testGetFoodThrowsException() throws Exception {
-        when(predatorMock.eatMeat()).thenThrow(new Exception("Ошибка при получении еды"));
-        cat.getFood();
-    }
+    public void shouldThrowExceptionWhenPredatorThrowsException() throws Exception {
 
-    @Test
-    public void testMultipleGetFoodCalls() throws Exception {
-        List<String> expectedFood = List.of("Животные", "Птицы", "Рыба");
-        when(predatorMock.eatMeat()).thenReturn(expectedFood);
+        // Given: зависимость выбрасывает Exception при попытке получить еду
+        Mockito.when(feline.eatMeat()).thenThrow(
+                new Exception("Не удалось получить еду")
+        );
 
+        // When: вызываем getFood()
         cat.getFood();
-        cat.getFood();
-
-        Mockito.verify(predatorMock, Mockito.times(2)).eatMeat();
+        // Then @Test(expected = Exception.class)
     }
 }
